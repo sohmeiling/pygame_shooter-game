@@ -1,6 +1,7 @@
 #Create your own shooter
 
 from pygame import *
+from random import randint
 
 #parent class for other sprites
 class GameSprite(sprite.Sprite):
@@ -36,10 +37,45 @@ class Player(GameSprite):
     def fire(self):
         pass
 
+#child class for enemy
+class Enemy (GameSprite):
+    #movemement method for the UFO
+    def update(self):
+        self.rect.y +=self.speed
+        global lost
+        if self.rect.y > win_height:
+            self.rect.x = randint(80, win_width -80)
+            self.rect.y = 0
+            lost = lost + 1
+            
+#child class for bullets
+class Bullet(GameSprite):
+    #enemy movement
+    def update(self):
+        self.rect.y += self.speed
+        #disappears upon reaching the screen edge
+        if self.rect.y < 0:
+            self.kill()
 
+#variables
+score = 0 #tally of ships destroyed
+lost = 0 #tally of ships that we missed
+goal= 10 #number of ships to shoot down to win
+max_lost = 3 #lose if we lose 3 ships
+
+#fonts and captions
+font.init()
+displayText = font.Font(None, 36) #Varriable texts
+
+endText = font.Font(None, 80) #win/lose texts
+win = endText.render("YOU WIN!", True, (252, 244, 3))
+lose = endText.render("YOU LOSE!", True, (196, 16, 31))           
+            
 #we need the following images:
-img_bg = "galaxy.jpg" #game background
+img_bg = "space.jpg" #game background
 img_hero = "rocket.png" #hero
+img_enemy = "ufo.png" #enemy
+img_bullet = "bullet.png" #bullet
 
 #window properties
 win_width = 700
@@ -58,6 +94,14 @@ fire_sound = mixer.Sound('fire.ogg') #sound effects
 #create sprites
 ship = Player(img_hero, 5, win_height - 100, 80, 100, 10)
 
+UFOs = sprite.Group()
+for i in range(1, 6):
+    ufo = Enemy(img_enemy, randint(80, win_width -80), -40, 80, 50, randint(1, 5))
+    UFOs.add(ufo)
+
+#create Bullet sprites
+bullets = sprite.Group()
+
 #game loop
 game = True
 finish = False
@@ -68,6 +112,10 @@ while game:
     for e in event.get():
         if e.type == QUIT:
             game = False
+        #event of pressing the spacebar - the sprite shoots
+        elif e.type == KEYDOWN:
+            fire_sound.play()
+            ship.fire() 
 
     if not finish:
         #update the background
@@ -75,12 +123,28 @@ while game:
 
         #launch sprite movements
         ship.update()
-
-        #update them in a new location in each loop iteration
         ship.reset()
+
+        #enemies falling down
+        UFOs.update()
+        UFOs.draw(window)
+
+        #launch bullets
+        bullets.update()
+        bullets.draw(window)
+
+        #write text on the screen
+        SCORE = displayText.render("Score: " + str(score), 1, (255, 255, 255))
+        window.blit(SCORE, (10,20))
+
+        MISSED = displayText.render("Missed: " + str(lost), 1, (255, 255, 255))
+        window.blit(MISSED, (10, 50))
+
+        #check for collision
+        collides = sprite.groupcollide(UFOs, bullets, True, True)
 
         display.update()
         clock.tick(FPS)
-
+        
     #the loop is executed each 0.05 sec
     time.delay(50)
