@@ -35,7 +35,8 @@ class Player(GameSprite):
 
     #method to "shoot" (use the player position to create a bullet there)
     def fire(self):
-        pass
+        bullet = Bullet(img_bullet, self.rect.centerx, self.rect.top, 15, 20, -15)
+        bullets.add(bullet) 
 
 #child class for enemy
 class Enemy (GameSprite):
