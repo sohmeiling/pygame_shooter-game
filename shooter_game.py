@@ -148,4 +148,27 @@ while game:
         clock.tick(FPS)
         
     #the loop is executed each 0.05 sec
-    time.delay(50)
+    time.delay(3000)
+    
+    else:
+       finish = False
+       score = 0
+       lost = 0
+       num_fire = 0
+       life = 3
+       for b in bullets:
+           b.kill()
+       for m in monsters:
+           m.kill()
+       for a in asteroids:
+           a.kill()   
+    
+       time.delay(3000)
+       for i in range(1, 6):
+           UFO = Enemy(img_enemy, randint(80, win_width - 80), -40, 80, 50, randint(1, 5))
+           UFOs.add(UFO)
+       for i in range(1, 3):
+           asteroid = Enemy(img_ast, randint(30, win_width - 30), -40, 80, 50, randint(1, 7))
+           asteroids.add(asteroid)   
+
+
